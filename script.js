@@ -30,7 +30,7 @@ document.addEventListener("keydown", function (e) {
     }
 });
 
-//> scroll scrolling to the element
+//> scroll scrolling to the element-------------------------------------------------------------------------!!!!!!
 const btnScrollTo = document.querySelector(".btn--scroll-to");
 const section1 = document.querySelector("#section--1");
 btnScrollTo.addEventListener("click", function () {
@@ -41,7 +41,7 @@ btnScrollTo.addEventListener("click", function () {
     });
 });
 
-//>events delegation methods
+//>events delegation methods ----------------------------------------------------------------------------------!!!!
 // 1. add event listener to the common parent element and then use the bubbling to select the element and use the event listner of parent.
 // 2. we can use event listner to each element but that would make the code repeat itself for each event listener and therefore there would be performance issues.
 
@@ -59,7 +59,7 @@ document.querySelector(".nav__links").addEventListener("click", (e) => {
     }
 });
 
-//>Switching the tabs
+//>Switching the tabs--------------------------------------------------------------------------------------!!!!
 //first we will check on which the click event is happened and the add the active class to that tab and
 //content and remove the remove the active class from earlier tab and content.
 
@@ -88,4 +88,112 @@ tabs.forEach(function (tab) {
             .querySelector(`.operations__content--${num}`)
             .classList.add("operations__content--active");
     });
+});
+
+//> menu fade---------------------------------------------------------------------------------------------------!!!!!!
+//>providing arguments in event listners
+//here we will use a common function to add two event listners and pass different argument using bind method.
+const nav = document.querySelector(".nav");
+function fadeOut(e) {
+    if (e.target.classList.contains("nav__link")) {
+        const current = e.target;
+        const links = current.closest(".nav").querySelectorAll(".nav__link");
+        const logo = current.closest(".nav").querySelector("img");
+
+        links.forEach((el) => {
+            if (el != current) {
+                el.style.opacity = this;
+            }
+        });
+        logo.style.opacity = this;
+    }
+}
+//adding the event listner to the nav items and passing the fade out function connected with
+//bind method to the value we pass
+
+nav.addEventListener("mouseover", fadeOut.bind(0.5));
+nav.addEventListener("mouseout", fadeOut.bind(1));
+
+//> making the nav bar sticky after a certain point---------------------------------------------------------!!!!
+
+const header = document.querySelector(".header");
+//adding the scroll event to the window scroll
+// const topDistance = document
+//     .querySelector("#section--1")
+//     .getBoundingClientRect().top;
+
+// window.addEventListener("scroll", function () {
+// check a certain scrolling position after which we will add the sticky class
+
+//     console.log(topDistance);
+//     if (window.scrollY > topDistance) {
+//add the sticky class to the nav bar
+//         nav.classList.add("sticky");
+//     } else {
+//         nav.classList.remove("sticky");
+//     }
+// });
+
+//> Intersection observer Api for higher performance-------------------------------------------------------!!!!!
+
+const obsCallback = function (entries, Observer) {
+    //here entries are the each intersection change.
+    const [entry] = [...entries];
+    if (!entry.isIntersecting) {
+        nav.classList.add("sticky");
+    } else {
+        nav.classList.remove("sticky");
+    }
+};
+const height = nav.getBoundingClientRect().height;
+const obsOptions = {
+    root: null,
+    threshold: 0,
+    rootMargin: `-${height}px`,
+};
+const Observer = new IntersectionObserver(obsCallback, obsOptions);
+Observer.observe(header);
+//> reveal section on ------------------------------------------------------------------------------------!!!
+const sections = document.querySelectorAll(".section");
+
+function revealSection(entries, observer) {
+    const [entry] = entries;
+    //here we are checking if the section is intersecting,if it is intersecting only then we will remove the class.
+    if (!entry.isIntersecting) return;
+    entry.target.classList.remove("section--hidden");
+    observer.unobserve(entry.target);
+}
+
+const sectionObserver = new IntersectionObserver(revealSection, {
+    root: null,
+    threshold: 0.2,
+});
+
+sections.forEach((section) => {
+    section.classList.add("section--hidden");
+    sectionObserver.observe(section);
+});
+
+//> lazy loading ------------------------------------------------------------------------------------------!!!
+const lazyImages = document.querySelectorAll("img[data-src]");
+
+const revealImage = function (entries, observer) {
+    const [entry] = entries;
+    console.log(entry);
+    if (!entry.isIntersecting) return;
+    entry.target.src = entry.target.dataset.src;
+    entry.target.addEventListener("load", () => {
+        entry.target.classList.remove("lazy-img");
+    });
+
+    observer.unobserve(entry.target);
+};
+const imageObserver = new IntersectionObserver(revealImage, {
+    root: null,
+    threshold: 0,
+    // rootMargin: "200px",
+});
+
+lazyImages.forEach((image) => {
+    imageObserver.observe(image);
 });
