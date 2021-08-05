@@ -166,7 +166,7 @@ function revealSection(entries, observer) {
 
 const sectionObserver = new IntersectionObserver(revealSection, {
     root: null,
-    threshold: 0.2,
+    threshold: 0.15,
 });
 
 sections.forEach((section) => {
@@ -179,7 +179,6 @@ const lazyImages = document.querySelectorAll("img[data-src]");
 
 const revealImage = function (entries, observer) {
     const [entry] = entries;
-    console.log(entry);
     if (!entry.isIntersecting) return;
     entry.target.src = entry.target.dataset.src;
     entry.target.addEventListener("load", () => {
@@ -197,3 +196,78 @@ const imageObserver = new IntersectionObserver(revealImage, {
 lazyImages.forEach((image) => {
     imageObserver.observe(image);
 });
+
+//> changing the tabs----------------------------------------------------------------------------------!!!!!!!!
+//>adding the dots to the section ------------------------------------------------------------------------------!!!!!
+//wrapping the whole funcitonality in a function gives freedom of using names in file
+function changeTab() {
+    const slides = document.querySelectorAll(".slide");
+    const btnRight = document.querySelector(".slider__btn--right");
+    const btnLeft = document.querySelector(".slider__btn--left");
+
+    const dots = document.querySelector(".dots");
+
+    let currentSlide = 0;
+
+    function moveSlides(num) {
+        slides.forEach((slide, i) => {
+            slide.style.transform = `translateX(${100 * (i - num)}%)`;
+        });
+    }
+    function createDots() {
+        slides.forEach((_, i) => {
+            dots.insertAdjacentHTML(
+                "beforeend",
+                `<button class="dots__dot" data-slide=${i}></button>`
+            );
+        });
+    }
+    createDots();
+
+    const dot = document.querySelectorAll("button[data-slide]");
+
+    function moveDotAlong() {
+        dot.forEach((x) => {
+            x.classList.remove("dots__dot--active");
+        });
+        Array.from(dot)[currentSlide].classList.add("dots__dot--active");
+    }
+
+    function nextSlide() {
+        if (currentSlide === slides.length - 1) {
+            currentSlide = 0;
+        } else {
+            currentSlide++;
+        }
+        moveSlides(currentSlide);
+        moveDotAlong();
+    }
+
+    function prevSlide() {
+        if (currentSlide === 0) {
+            currentSlide = slides.length - 1;
+        } else {
+            currentSlide--;
+        }
+        moveSlides(currentSlide);
+        moveDotAlong();
+    }
+
+    moveSlides(0);
+    Array.from(dot)[currentSlide].classList.add("dots__dot--active");
+    function applyDots(e) {
+        if (e.target.classList.contains("dots__dot")) {
+            dot.forEach((x) => {
+                x.classList.remove("dots__dot--active");
+            });
+            e.target.classList.add("dots__dot--active");
+            moveSlides(e.target.dataset.slide);
+        }
+    }
+
+    btnRight.addEventListener("click", nextSlide);
+    btnLeft.addEventListener("click", prevSlide);
+
+    dots.addEventListener("click", applyDots);
+}
+changeTab();
